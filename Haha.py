@@ -2,7 +2,8 @@ import os
 import discord
 from dotenv import load_dotenv
 
-load_dotenv()
+raw_token = os.getenv("DISCORD_TOKEN_HAHA")
+DISCORD_TOKEN_HAHA = raw_token.strip() if raw_token else None
 
 # DEBUG: Check if the token is actually there
 token = os.getenv("DISCORD_TOKEN_HAHA")
@@ -20,4 +21,7 @@ class MyClient(discord.Client):
         print('------')
 
 client = MyClient(intents=discord.Intents.default()) # Make sure you handle intents properly
-client.run(token)
+try:
+    client.run(token)
+except Exception as e:
+    print(f"Bot crashed with error: {e}")
