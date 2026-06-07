@@ -1,7 +1,7 @@
 import os
 import discord
 from dotenv import load_dotenv
-
+print(f"DEBUG: I am looking for the token in: {os.environ.get('DISCORD_TOKEN_HAHA')}")
 raw_token = os.getenv("DISCORD_TOKEN_HAHA")
 DISCORD_TOKEN_HAHA = raw_token.strip() if raw_token else None
 
