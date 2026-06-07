@@ -13,15 +13,11 @@ else:
     print(f"Token found! Length: {len(token)}") 
 
 class MyClient(discord.Client):
-    # ... (your existing class code) ...
-    
-    # Let's add this to see if it even connects
-    async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
+    # Remove the 'intents' argument from here
+    def __init__(self, *args, **kwargs):
+        # Remove the 'intents=intents' from super().__init__
+        super().__init__(*args, **kwargs)
 
-client = MyClient(intents=discord.Intents.default()) # Make sure you handle intents properly
-try:
-    client.run(token)
-except Exception as e:
-    print(f"Bot crashed with error: {e}")
+# Remove the 'intents=discord.Intents.default()' argument here
+client = MyClient() 
+client.run(token)
