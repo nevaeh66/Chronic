@@ -1,2 +1,5 @@
 [phases.setup]
 aptPkgs = []
+
+[start]
+cmd = "python Haha.py"
