@@ -22,8 +22,7 @@ curl_cffi==0.14.0
 cycler==0.12.1
 decorator==4.4.2
 discord-protos==0.0.2
-discord.py==2.7.1
-discord.py-self @ git+https://github.com/dolfies/discord.py-self@d0de36789f5832632476815b32661752a1a97748
+discord.py-self
 distro==1.9.0
 edge-tts==7.2.8
 einops==0.8.2
