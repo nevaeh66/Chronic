@@ -29,7 +29,7 @@ class MyClient(discord.Client):
             try:
                 # Strictly wait 60 seconds, but start at your offset
                 # This ensures the loop triggers exactly every minute
-                await asyncio.sleep(1) 
+                await asyncio.sleep(5) 
                 
                 # Perform the update
                 current_time = datetime.datetime.now().strftime("%I:%M %p")
@@ -46,7 +46,7 @@ class MyClient(discord.Client):
                 
             except Exception as e:
                 print(f"Error in loop: {e}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(5)
 
 # Run the client
 client = MyClient()
