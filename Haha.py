@@ -27,27 +27,28 @@ class MyClient(discord.Client):
         
         while not self.is_closed():
             try:
-                # Strictly wait 60 seconds, but start at your offset
-                # This ensures the loop triggers exactly every minute
-                await asyncio.sleep(5) 
+                # 1. Get current system time
+                now = datetime.datetime.now()
                 
-                # Perform the update
-                current_time = datetime.datetime.now().strftime("%I:%M %p")
+                # 2. Format the time
+                current_time = now.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
+                bio_text = f"I keep a close watch on time: {current_time}"
                 
-                # Update Bio
-                await self.user.edit(bio=status_text)
-                
-                # Update Status
+                # 3. Update Bio and Status
+                await self.user.edit(bio=bio_text)
                 activity = discord.CustomActivity(name=status_text)
                 await self.change_presence(activity=activity)
                 
-                print(f"DEBUG: Bio and Status updated to {status_text}")
+                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
+                
+                # 4. SLEEP UNTIL THE START OF THE NEXT MINUTE
+                # This kills the 'drift' because it always resets to the clock
+                await asyncio.sleep(5)
                 
             except Exception as e:
                 print(f"Error in loop: {e}")
-                await asyncio.sleep(5)
-
+                await asyncio.sleep(60) # Only sleep 60 on error
 # Run the client
 client = MyClient()
 client.run(token)
