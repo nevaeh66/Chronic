@@ -1,44 +1,53 @@
 import os
 import discord
 import datetime
+import asyncio
 from dotenv import load_dotenv
-print(f"DEBUG: I am looking for the token in: {os.environ.get('DISCORD_TOKEN_HAHA')}")
-raw_token = os.getenv("DISCORD_TOKEN_HAHA")
-DISCORD_TOKEN_HAHA = raw_token.strip() if raw_token else None
 
-# DEBUG: Check if the token is actually there
+# Load the environment variables from the .env file in the current directory
+load_dotenv()
+
+# Get the token
 token = os.getenv("DISCORD_TOKEN_HAHA")
 if not token:
     print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
-else:
-    print(f"Token found! Length: {len(token)}") 
+    exit() # Stop the script if no token is found
 
 class MyClient(discord.Client):
-    # Remove the 'intents' argument from here
     def __init__(self, *args, **kwargs):
-        # Remove the 'intents=intents' from super().__init__
         super().__init__(*args, **kwargs)
+
+    async def on_ready(self):
+        print(f'Logged on as {self.user}!')
+        # Start the background task
+        self.loop.create_task(self.update_everything_loop())
 
     async def update_everything_loop(self):
         await self.wait_until_ready()
         
         while not self.is_closed():
             try:
+                # Strictly wait 60 seconds, but start at your offset
+                # This ensures the loop triggers exactly every minute
+                await asyncio.sleep(1) 
+                
+                # Perform the update
                 current_time = datetime.datetime.now().strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
                 
-                # 1. Update the PUBLIC BIO
+                # Update Bio
                 await self.user.edit(bio=status_text)
                 
-                # 2. Update the PUBLIC CUSTOM STATUS
-                # This makes the "chronic" text change to the time
+                # Update Status
                 activity = discord.CustomActivity(name=status_text)
                 await self.change_presence(activity=activity)
                 
                 print(f"DEBUG: Bio and Status updated to {status_text}")
+                
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Error in loop: {e}")
+                await asyncio.sleep(1)
 
-# Remove the 'intents=discord.Intents.default()' argument here
-client = MyClient() 
+# Run the client
+client = MyClient()
 client.run(token)
