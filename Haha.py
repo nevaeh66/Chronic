@@ -56,6 +56,6 @@ class MyClient(discord.Client):
             except Exception as e:
                 print(f"Error in loop: {e}")
                 await asyncio.sleep(5)
-
+                
 client = MyClient()
 client.run(token)
