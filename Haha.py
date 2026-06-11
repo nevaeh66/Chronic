@@ -2,7 +2,7 @@ import os
 import discord
 import datetime
 import asyncio
-import zoneinfo
+import zoneinfo  # Handles the time zones correctly
 from dotenv import load_dotenv
 
 # Load the environment variables
@@ -16,22 +16,10 @@ if not token:
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Gatekeepers to prevent loop duplication on reconnects
-        self.loop_started = False
-        self.typing_started = False
 
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
-        
-        # Start the Time loop
-        if not self.loop_started:
-            self.loop.create_task(self.update_everything_loop())
-            self.loop_started = True
-
-        # Start the Global Typing loop
-        if not self.typing_started:
-            self.loop.create_task(self.global_dm_typing_loop())
-            self.typing_started = True
+        self.loop.create_task(self.update_everything_loop())
 
     async def update_everything_loop(self):
         await self.wait_until_ready()
@@ -53,33 +41,13 @@ class MyClient(discord.Client):
                 
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
-                # Kept at 60s to prevent an instant Captcha lock on the time updates
-                await asyncio.sleep(60)
+                # Wait until the start of the next minute to keep the clock synced
+                await asyncio.sleep(5)
                 
             except Exception as e:
-                print(f"Error in time loop: {e}")
-                await asyncio.sleep(60)
+                print(f"Error in loop: {e}")
+                await asyncio.sleep(5)
 
-    async def global_dm_typing_loop(self):
-        await self.wait_until_ready()
-        print("DEBUG: Global DM typing loop started.")
-        
-        while not self.is_closed():
-            try:
-                # Loop through every private channel the bot has currently cached
-                for channel in self.private_channels:
-                    # Ensure it's actually a DM or Group Chat
-                    if isinstance(channel, (discord.DMChannel, discord.GroupChannel)):
-                        await channel.typing()
-                        # A tiny micro-delay so Discord doesn't reject the payload outright
-                        await asyncio.sleep(0.5) 
                 
-                # Wait 9 seconds before refreshing the typing status in all DMs
-                await asyncio.sleep(9)
-                
-            except Exception as e:
-                print(f"Error in typing loop: {e}")
-                await asyncio.sleep(10)
-
 client = MyClient()
 client.run(token)
