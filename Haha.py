@@ -68,26 +68,17 @@ class MyClient(discord.Client):
             try:
                 # Loop through every private channel the bot has currently cached
                 for channel in self.private_channels:
+                    # Ensure it's actually a DM or Group Chat
                     if isinstance(channel, (discord.DMChannel, discord.GroupChannel)):
-                        try:
-                            await channel.typing()
-                            # 1.5s delay spaces out the requests enough to mostly avoid 429s
-                            await asyncio.sleep(1.5) 
-                        except discord.HTTPException as http_err:
-                            # The Emergency Brake: Catch the rate limit before it crashes the loop
-                            if http_err.status == 429:
-                                print(f"DEBUG: Rate limit hit on channel {channel.id}. Cooling down for 15s...")
-                                await asyncio.sleep(15)
-                            else:
-                                print(f"HTTP Error: {http_err}")
-                        except Exception as e:
-                            print(f"Unexpected error on channel {channel.id}: {e}")
+                        await channel.typing()
+                        # A tiny micro-delay so Discord doesn't reject the payload outright
+                        await asyncio.sleep(0.5) 
                 
-                # Wait before starting the next sweep to let the API breathe
-                await asyncio.sleep(5)
+                # Wait 9 seconds before refreshing the typing status in all DMs
+                await asyncio.sleep(9)
                 
             except Exception as e:
-                print(f"Fatal error in master typing loop: {e}")
+                print(f"Error in typing loop: {e}")
                 await asyncio.sleep(10)
 
 client = MyClient()
