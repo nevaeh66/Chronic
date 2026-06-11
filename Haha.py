@@ -42,11 +42,11 @@ class MyClient(discord.Client):
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
                 # Wait until the start of the next minute to keep the clock synced
-                await asyncio.sleep(5)
+                await asyncio.sleep(30)
                 
             except Exception as e:
                 print(f"Error in loop: {e}")
-                await asyncio.sleep(5)
+                await asyncio.sleep(30)
 
                 
 client = MyClient()
