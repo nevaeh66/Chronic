@@ -14,21 +14,12 @@ if not token:
     exit()
 
 class MyClient(discord.Client):
-    # This section was missing! It initializes the flag variable.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.loop_started = False 
 
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
-        
-        # Check the flag before starting the loop so it doesn't multiply
-        if not self.loop_started:
-            self.loop.create_task(self.update_everything_loop())
-            self.loop_started = True 
-            print("DEBUG: Background loop started.")
-        else:
-            print("DEBUG: Reconnected. Loop already running, skipping duplicate.")
+        self.loop.create_task(self.update_everything_loop())
 
     async def update_everything_loop(self):
         await self.wait_until_ready()
@@ -41,7 +32,7 @@ class MyClient(discord.Client):
                 
                 current_time = now.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
-                bio_text = f"I keep a close watch on time; it is {current_time}"
+                bio_text = f"I keep a close watch on time: {current_time}"
                 
                 # Update Bio and Status
                 await self.user.edit(bio=bio_text)
@@ -50,13 +41,12 @@ class MyClient(discord.Client):
                 
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
-                # Sleep for 5 seconds as requested
+                # Wait until the start of the next minute to keep the clock synced
                 await asyncio.sleep(5)
                 
             except Exception as e:
                 print(f"Error in loop: {e}")
                 await asyncio.sleep(5)
-
 
                 
 client = MyClient()
