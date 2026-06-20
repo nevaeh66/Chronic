@@ -2,9 +2,9 @@ import os
 import requests
 
 # Pulling credentials from the Railway environment variables
-RAILWAY_TOKEN = os.getenv("f9c2d95f-3644-4373-ab3f-0a4d920df42c")
-SERVICE_ID = os.getenv("a0c6028b-5fdb-434f-8580-3c986c601947")
-ENV_ID = os.getenv("1e434460-e790-43f0-95c3-a3d8219a9aa5")
+RAILWAY_TOKEN = os.getenv("RAILWAY_TOKEN")
+SERVICE_ID = os.getenv("TARGET_SERVICE_ID")
+ENV_ID = os.getenv("TARGET_ENV_ID")
 
 def force_reboot():
     url = "https://backboard.railway.app/graphql/v2"
