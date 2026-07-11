@@ -61,6 +61,6 @@ class MyClient(discord.Client):
                 print(f"Error in loop: {e}")
                 await asyncio.sleep(20)
 
-client = MyClient(intents=discord.Intents.default())
+client = MyClient()
 client.run(token)
 
