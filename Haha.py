@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 token = os.getenv("DISCORD_TOKEN_HAHA")
-# This is the "Pause Switch" variable
 DISABLE_BOT = os.getenv("DISABLE_BOT", "false").lower()
 
 if not token:
@@ -19,14 +18,8 @@ if not token:
 
 class MyClient(discord.Client):
     async def on_ready(self):
+        # We removed the sys.exit() check from here!
         print(f'Logged on as {self.user}!')
-        
-        # Check the Pause Switch immediately upon startup
-        if DISABLE_BOT == "true":
-            print("DISABLE_BOT is true. The bot is pausing itself. Exiting...")
-            await self.close()
-            sys.exit(0)
-            
         self.loop.create_task(self.update_everything_loop())
 
     async def update_everything_loop(self):
@@ -47,7 +40,6 @@ class MyClient(discord.Client):
                 
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
-                # INCREASED SLEEP TO 60 SECONDS TO PREVENT 429 ERRORS
                 await asyncio.sleep(60)
                 
             except discord.HTTPException as e:
@@ -59,8 +51,14 @@ class MyClient(discord.Client):
                     await asyncio.sleep(60)
             except Exception as e:
                 print(f"Error in loop: {e}")
-                await asyncio.sleep(20)
+                await asyncio.sleep(60)
 
 client = MyClient()
-client.run(token)
 
+# --- THE CLEAN PAUSE SWITCH ---
+if DISABLE_BOT == "true":
+    print("DISABLE_BOT is true. The bot is paused. Exiting before login...")
+    sys.exit(0)
+else:
+    # Only run the bot if it is NOT disabled
+    client.run(token)
