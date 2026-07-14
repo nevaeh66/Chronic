@@ -40,7 +40,15 @@ class MyClient(discord.Client):
                 
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
-                await asyncio.sleep(60)
+                # --- THE DRIFT-PROOF CLOCK SYNC ---
+                # Check the time AGAIN right after Discord finishes updating
+                finished_time = datetime.datetime.now(tz)
+                
+                # Calculate exactly how many seconds are left until the next XX:XX:00
+                seconds_to_sleep = 60 - finished_time.second
+                
+                print(f"Syncing... Sleeping for {seconds_to_sleep} seconds to hit the next minute perfectly.")
+                await asyncio.sleep(seconds_to_sleep)
                 
             except discord.HTTPException as e:
                 if e.status == 429:
