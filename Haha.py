@@ -30,7 +30,11 @@ class MyClient(discord.Client):
                 tz = zoneinfo.ZoneInfo("America/Vancouver")
                 now = datetime.datetime.now(tz)
                 
-                current_time = now.strftime("%I:%M %p")
+                # 1. TIME TRAVEL TRICK: Look 15 seconds into the future
+                # This ensures if it is 12:00:45, the bot writes 12:01 PM
+                future_time = now + datetime.timedelta(seconds=15)
+                
+                current_time = future_time.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
@@ -38,16 +42,19 @@ class MyClient(discord.Client):
                 activity = discord.CustomActivity(name=status_text)
                 await self.change_presence(activity=activity)
                 
-                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
+                print(f"DEBUG: Predicting {status_text}. Sent to Discord at {now.strftime('%I:%M:%S %p')}")
                 
-                # --- THE DRIFT-PROOF CLOCK SYNC ---
-                # Check the time AGAIN right after Discord finishes updating
+                # 2. THE OFFSET SYNC: Calculate sleep to wake up at the 45th second
                 finished_time = datetime.datetime.now(tz)
                 
-                # Calculate exactly how many seconds are left until the next XX:XX:00
-                seconds_to_sleep = 60 - finished_time.second
+                if finished_time.second >= 45:
+                    # If we are past the 45s mark, sleep into the NEXT minute's 45th second
+                    seconds_to_sleep = (60 - finished_time.second) + 45
+                else:
+                    # Sleep exactly until the CURRENT minute's 45th second
+                    seconds_to_sleep = 45 - finished_time.second
                 
-                print(f"Syncing... Sleeping for {seconds_to_sleep} seconds to hit the next minute perfectly.")
+                print(f"DEBUG: Sleeping for {seconds_to_sleep} seconds to fire 15s early.")
                 await asyncio.sleep(seconds_to_sleep)
                 
             except discord.HTTPException as e:
