@@ -32,7 +32,7 @@ from dotenv import load_dotenv
                 
 #                 current_time = now.strftime("%I:%M %p")
 #                 status_text = f"it is {current_time}"
-#                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
+#                 bio_text = f"I keep a close watch on time; right now it is {current_time}"
                 
 #                 # Update Bio and Status
 #                 await self.user.edit(bio=bio_text)
