@@ -5,21 +5,21 @@ import asyncio
 import zoneinfo  # Handles the time zones correctly
 from dotenv import load_dotenv
 
-# Load the environment variables
-load_dotenv()
+# # Load the environment variables
+# load_dotenv()
 
-token = os.getenv("DISCORD_TOKEN_HAHA")
-if not token:
-    print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
-    exit()
+# token = os.getenv("DISCORD_TOKEN_HAHA")
+# if not token:
+#     print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
+#     exit()
 
-class MyClient(discord.Client):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# class MyClient(discord.Client):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
 
-    async def on_ready(self):
-        print(f'Logged on as {self.user}!')
-        self.loop.create_task(self.update_everything_loop())
+#     async def on_ready(self):
+#         print(f'Logged on as {self.user}!')
+#         self.loop.create_task(self.update_everything_loop())
 
 #     async def update_everything_loop(self):
 #         await self.wait_until_ready()
