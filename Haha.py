@@ -36,15 +36,11 @@ class MyClient(discord.Client):
                 # 1. Update Profile Bio
                 await self.user.edit(bio=bio_text)
                 
-                # 2. Rich Presence "Playing Among Us" (using official App ID) + Custom Speech Bubble Time
-                game_activity = discord.Activity(
-                    type=discord.ActivityType.playing,
-                    name="Among Us",
-                    application_id=756910603713020000
-                )
+                # 2. Set "Playing Among Us" and Custom Time Status
+                game_activity = discord.Game(name="Among Us")
                 custom_status = discord.CustomActivity(name=status_text)
                 
-                await self.change_presence(activities=[custom_status, game_activity])
+                await self.change_presence(activities=[game_activity, custom_status])
                 
                 print(f"DEBUG: Bio and Status updated to {status_text} at {now.strftime('%I:%M:%S %p')}")
                 
