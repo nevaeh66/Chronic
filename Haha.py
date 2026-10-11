@@ -33,20 +33,24 @@ class MyClient(discord.Client):
                 status_text = f"it is {current_time}"
                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
-                # 1. Update Bio
+                # 1. Update Profile Bio
                 await self.user.edit(bio=bio_text)
                 
-                # 2. Set both "Playing Among Us" and the Custom Time Status simultaneously
-                game_activity = discord.Game(name="Among Us")
+                # 2. Rich Presence "Playing Among Us" (using official App ID) + Custom Speech Bubble Time
+                game_activity = discord.Activity(
+                    type=discord.ActivityType.playing,
+                    name="Among Us",
+                    application_id=756910603713020000
+                )
                 custom_status = discord.CustomActivity(name=status_text)
-                await self.change_presence(activities=[game_activity, custom_status])
                 
-                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
+                await self.change_presence(activities=[custom_status, game_activity])
                 
-                # --- THE DRIFT-PROOF CLOCK SYNC ---
+                print(f"DEBUG: Bio and Status updated to {status_text} at {now.strftime('%I:%M:%S %p')}")
+                
+                # 3. Top of the minute clock sync
                 finished_time = datetime.datetime.now(tz)
                 seconds_to_sleep = 60 - finished_time.second
-                
                 if seconds_to_sleep == 0:
                     seconds_to_sleep = 60
                 
