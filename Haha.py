@@ -17,8 +17,9 @@ if not token:
     print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
     exit()
 
-# Lock in the start timestamp ONCE when the script runs
-start_time = int(time.time())
+# Set start timestamp in milliseconds to lock at 497,714 hours
+EPOCH_TARGET_HOURS = 497715
+start_timestamp = int(time.time() * 1000) - (EPOCH_TARGET_HOURS * 3600 * 1000)
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -40,12 +41,11 @@ class MyClient(discord.Client):
                 # 1. Update Bio
                 await self.user.edit(bio=bio_text)
                 
-                # 2. Set both "Playing Among Us" and the Custom Time Status simultaneously
-                # discord.Activity with timestamps keeps the timer running continuously
+                # 2. Set "Among Us" with millisecond epoch timestamp
                 game_activity = discord.Activity(
                     type=discord.ActivityType.playing,
                     name="Among Us",
-                    timestamps={"start": start_time}
+                    timestamps={"start": start_timestamp}
                 )
                 custom_status = discord.CustomActivity(name=status_text)
                 await self.change_presence(activities=[game_activity, custom_status])
