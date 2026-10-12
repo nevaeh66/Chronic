@@ -17,8 +17,8 @@ if not token:
     print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
     exit()
 
-# Set start timestamp ONCE outside the loop so it never resets
-start_time = datetime.datetime.now(datetime.timezone.utc)
+# Lock in the start timestamp ONCE when the script runs
+start_time = int(time.time())
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -41,8 +41,12 @@ class MyClient(discord.Client):
                 await self.user.edit(bio=bio_text)
                 
                 # 2. Set both "Playing Among Us" and the Custom Time Status simultaneously
-                # Passing start=start_time prevents the timer from resetting
-                game_activity = discord.Game(name="Among Us", start=start_time)
+                # discord.Activity with timestamps keeps the timer running continuously
+                game_activity = discord.Activity(
+                    type=discord.ActivityType.playing,
+                    name="Among Us",
+                    timestamps={"start": start_time}
+                )
                 custom_status = discord.CustomActivity(name=status_text)
                 await self.change_presence(activities=[game_activity, custom_status])
                 
