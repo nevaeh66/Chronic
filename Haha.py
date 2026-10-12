@@ -17,7 +17,7 @@ if not token:
     exit()
 
 # Unix Epoch origin (Jan 1, 1970) - lets Discord calculate the true live epoch hours (~497,718+)
-EPOCH_START = 497117
+EPOCH_START = 497717
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -34,7 +34,7 @@ class MyClient(discord.Client):
                 
                 current_time = now.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
-                bio_text = f"I keep a close watch on time; it is currently {current_time}\n\n\nPlaying Among Us since the Unix epoch"
+                bio_text = f"I keep a close watch on time; it is currently {current_time}\n\nPlaying Among Us since the Unix epoch"
                 
                 # 1. Update Bio
                 await self.user.edit(bio=bio_text)
