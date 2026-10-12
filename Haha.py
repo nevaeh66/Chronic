@@ -4,6 +4,7 @@ import datetime
 import asyncio
 import zoneinfo
 import sys
+import time
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,6 +18,12 @@ if not token:
     exit()
 
 class MyClient(discord.Client):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Store start timestamp ONCE when the bot starts up
+        # This keeps the elapsed time counter going up indefinitely
+        self.bot_start_time = int(time.time())
+
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
         self.loop.create_task(self.update_everything_loop())
@@ -33,24 +40,31 @@ class MyClient(discord.Client):
                 status_text = f"it is {current_time}"
                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
-                # 1. Update Bio
+                # 1. Update Profile Bio
                 await self.user.edit(bio=bio_text)
                 
-                # 2. Set both "Playing Among Us" and the Custom Time Status simultaneously
-                game_activity = discord.Game(name="Among Us")
+                # 2. Activity with persistent start timestamp (prevents hourly reset)
+                # Uses discord.Activity to avoid log deprecation warnings
+                game_activity = discord.Activity(
+                    type=discord.ActivityType.playing,
+                    name="Among Us ",
+                    timestamps={"start": self.bot_start_time}
+                )
+                
+                # 3. Speech bubble custom status
                 custom_status = discord.CustomActivity(name=status_text)
+                
                 await self.change_presence(activities=[game_activity, custom_status])
                 
-                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
+                print(f"DEBUG: Bio and Status updated to '{status_text}' at {now.strftime('%I:%M:%S %p')}")
                 
-                # --- THE DRIFT-PROOF CLOCK SYNC ---
+                # --- DRIFT-PROOF CLOCK SYNC ---
                 finished_time = datetime.datetime.now(tz)
                 seconds_to_sleep = 60 - finished_time.second
-                
                 if seconds_to_sleep == 0:
                     seconds_to_sleep = 60
                 
-                print(f"Syncing... Sleeping for {seconds_to_sleep} seconds to hit the next minute perfectly.")
+                print(f"Syncing... Sleeping for {seconds_to_sleep} seconds.")
                 await asyncio.sleep(seconds_to_sleep)
                 
             except discord.HTTPException as e:
@@ -66,7 +80,7 @@ class MyClient(discord.Client):
 
 client = MyClient()
 
-# --- THE CLEAN PAUSE SWITCH ---
+# Pause control switch for Railway deployment management
 if DISABLE_BOT == "true":
     print("DISABLE_BOT is true. The bot is paused. Exiting before login...")
     sys.exit(0)
