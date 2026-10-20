@@ -4,6 +4,7 @@ import datetime
 import asyncio
 import zoneinfo
 import sys
+import time
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -16,8 +17,9 @@ if not token:
     print("CRITICAL ERROR: DISCORD_TOKEN_HAHA is not set!")
     exit()
 
-# Unix Epoch origin (Jan 1, 1970) - lets Discord calculate the true live epoch hours (~497,718+)
-EPOCH_START = 497717
+# Anchor timestamp for your 497,716+ hour timer
+EPOCH_TARGET_HOURS = 497716
+start_timestamp = int(time.time()) - (EPOCH_TARGET_HOURS * 3600)
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -34,21 +36,17 @@ class MyClient(discord.Client):
                 
                 current_time = now.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
-                bio_text = f"I keep a close watch on time; it is currently {current_time}\n\nPlaying Among Us since the Unix epoch"
                 
-                # 1. Update Bio
-                await self.user.edit(bio=bio_text)
-                
-                # 2. Set "Among Us" tied to Epoch 0 (displays current live epoch hours & counts up)
+                # ONLY update the activity presence (Safe)
                 game_activity = discord.Activity(
                     type=discord.ActivityType.playing,
                     name="Among Us",
-                    timestamps={"start": EPOCH_START}
+                    timestamps={"start": start_timestamp}
                 )
                 custom_status = discord.CustomActivity(name=status_text)
                 await self.change_presence(activities=[game_activity, custom_status])
                 
-                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
+                print(f"DEBUG: Status updated to {status_text} at {now}")
                 
                 # --- THE DRIFT-PROOF CLOCK SYNC ---
                 finished_time = datetime.datetime.now(tz)
