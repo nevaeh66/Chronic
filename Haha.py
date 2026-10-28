@@ -29,8 +29,6 @@ class MyClient(discord.Client):
     async def update_everything_loop(self):
         await self.wait_until_ready()
         
-        last_bio_update_time = 0
-        
         while not self.is_closed():
             try:
                 tz = zoneinfo.ZoneInfo("America/Vancouver")
@@ -40,23 +38,10 @@ class MyClient(discord.Client):
                 status_text = f"it is {current_time}"
                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
-                current_timestamp = time.time()
+                # 1. Update Bio directly every minute
+                await self.user.edit(bio=bio_text)
                 
-                # 1. Smart Bio Update (Every 3 minutes, with proper backoff handling to prevent lockouts)
-                if current_timestamp - last_bio_update_time >= 180:
-                    try:
-                        await self.user.edit(bio=bio_text)
-                        print(f"DEBUG: Bio successfully updated to {bio_text}")
-                    except discord.HTTPException as e:
-                        if e.status == 429:
-                            print("Bio update rate-limited; backing off safely.")
-                        else:
-                            print(f"Bio HTTPException: {e}")
-                    finally:
-                        # Always update the timer so it doesn't spam every minute on failure
-                        last_bio_update_time = current_timestamp
-                
-                # 2. Activity & Status Update (Runs every minute without fail)
+                # 2. Set "Among Us" Activity and Custom Status
                 game_activity = discord.Activity(
                     type=discord.ActivityType.playing,
                     name="Among Us",
@@ -65,7 +50,7 @@ class MyClient(discord.Client):
                 custom_status = discord.CustomActivity(name=status_text)
                 await self.change_presence(activities=[game_activity, custom_status])
                 
-                print(f"DEBUG: Status updated to {status_text} at {now}")
+                print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
                 
                 # --- THE DRIFT-PROOF CLOCK SYNC ---
                 finished_time = datetime.datetime.now(tz)
