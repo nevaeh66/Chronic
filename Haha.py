@@ -29,7 +29,7 @@ class MyClient(discord.Client):
     async def update_everything_loop(self):
         await self.wait_until_ready()
         
-        last_bio_update_time = 0  # Tracks real-world time for bio updates
+        last_bio_update_time = 0
         
         while not self.is_closed():
             try:
@@ -42,17 +42,19 @@ class MyClient(discord.Client):
                 
                 current_timestamp = time.time()
                 
-                # 1. Smart Bio Update (Updates every 5 minutes using real-world time, skipping safely if rate limited)
-                if current_timestamp - last_bio_update_time >= 300:
+                # 1. Smart Bio Update (Every 3 minutes, with proper backoff handling to prevent lockouts)
+                if current_timestamp - last_bio_update_time >= 180:
                     try:
                         await self.user.edit(bio=bio_text)
-                        last_bio_update_time = current_timestamp
                         print(f"DEBUG: Bio successfully updated to {bio_text}")
                     except discord.HTTPException as e:
                         if e.status == 429:
-                            print("Bio update rate-limited; backing off bio update for now.")
+                            print("Bio update rate-limited; backing off safely.")
                         else:
                             print(f"Bio HTTPException: {e}")
+                    finally:
+                        # Always update the timer so it doesn't spam every minute on failure
+                        last_bio_update_time = current_timestamp
                 
                 # 2. Activity & Status Update (Runs every minute without fail)
                 game_activity = discord.Activity(
