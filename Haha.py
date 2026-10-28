@@ -29,7 +29,8 @@ class MyClient(discord.Client):
     async def update_everything_loop(self):
         await self.wait_until_ready()
         
-        counter = 0  # Used to throttle bio updates safely
+        last_bio_update_time = 0  # Tracks real-world time for bio updates
+        
         while not self.is_closed():
             try:
                 tz = zoneinfo.ZoneInfo("America/Vancouver")
@@ -39,18 +40,21 @@ class MyClient(discord.Client):
                 status_text = f"it is {current_time}"
                 bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
-                # 1. Throttled Bio Update (Runs every 10 minutes to avoid API blocks)
-                if counter % 10 == 0:
+                current_timestamp = time.time()
+                
+                # 1. Smart Bio Update (Updates every 5 minutes using real-world time, skipping safely if rate limited)
+                if current_timestamp - last_bio_update_time >= 300:
                     try:
                         await self.user.edit(bio=bio_text)
-                        print(f"DEBUG: Bio updated to {bio_text}")
+                        last_bio_update_time = current_timestamp
+                        print(f"DEBUG: Bio successfully updated to {bio_text}")
                     except discord.HTTPException as e:
                         if e.status == 429:
-                            print("Bio update rate-limited, skipping bio update this cycle.")
+                            print("Bio update rate-limited; backing off bio update for now.")
                         else:
-                            raise e
+                            print(f"Bio HTTPException: {e}")
                 
-                # 2. Activity & Status Update (Safe to run every minute)
+                # 2. Activity & Status Update (Runs every minute without fail)
                 game_activity = discord.Activity(
                     type=discord.ActivityType.playing,
                     name="Among Us",
@@ -60,7 +64,6 @@ class MyClient(discord.Client):
                 await self.change_presence(activities=[game_activity, custom_status])
                 
                 print(f"DEBUG: Status updated to {status_text} at {now}")
-                counter += 1
                 
                 # --- THE DRIFT-PROOF CLOCK SYNC ---
                 finished_time = datetime.datetime.now(tz)
