@@ -29,8 +29,6 @@ class MyClient(discord.Client):
     async def update_everything_loop(self):
         await self.wait_until_ready()
         
-        cycle_count = 0
-        
         while not self.is_closed():
             try:
                 tz = zoneinfo.ZoneInfo("America/Vancouver")
@@ -38,9 +36,9 @@ class MyClient(discord.Client):
                 
                 current_time = now.strftime("%I:%M %p")
                 status_text = f"it is {current_time}"
-                bio_text = f"I keep a close watch on time; it is currently {current_time}"
                 
-                # 1. Always update the Among Us status via WebSocket (Safe and instant)
+                # Only update the WebSocket presence (Among Us status & time status).
+                # This bypasses the REST API user edits that are triggering the captcha lockouts.
                 game_activity = discord.Activity(
                     type=discord.ActivityType.playing,
                     name="Among Us",
@@ -49,15 +47,7 @@ class MyClient(discord.Client):
                 custom_status = discord.CustomActivity(name=status_text)
                 await self.change_presence(activities=[game_activity, custom_status])
                 
-                # 2. De-sync the bio update: Only update the bio every 3 minutes 
-                # to prevent hitting Discord's security with simultaneous requests
-                if cycle_count % 3 == 0:
-                    await self.user.edit(bio=bio_text)
-                    print(f"DEBUG: Bio and Status updated to {status_text} at {now}")
-                else:
-                    print(f"DEBUG: Status updated to {status_text} at {now} (Skipping bio this cycle to avoid captcha)")
-                
-                cycle_count += 1
+                print(f"DEBUG: Status updated to {status_text} at {now}")
                 
                 # --- THE DRIFT-PROOF CLOCK SYNC ---
                 finished_time = datetime.datetime.now(tz)
